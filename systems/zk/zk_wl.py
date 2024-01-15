@@ -74,7 +74,7 @@ out = ''
 err = ''
 #present_value = '0000'
 
-
+all_start = True
 # Get state of ZooKeeper nodes before reading data
 if log_dir is not None:
         client_log_file = os.path.join(log_dir, 'log-client')
@@ -91,6 +91,8 @@ if log_dir is not None:
                                 if check in i:
                                         found = True
                         to_write += check[:6] + ' running:' + str(found) + '\n'
+			if not found:
+				all_start = False
 
                 f.write(to_write)
                 f.write('----------------------------------------------\n')
@@ -99,24 +101,26 @@ if log_dir is not None:
 out = ''
 err = ''
 
-
+all_create = all_start
 # Create Workload here
-for server_index in range(1, 4):
-        returned = None
-        zk = None
+if all_start:
+	for server_index in range(1, 4):
+        	returned = None
+        	zk = None
 
-        connect_string = host_list[server_index-1] + ':' + str(port_list[server_index-1])
-        kz_retry = KazooRetry(max_tries=1, delay=0.25, backoff=2)
-        zk = KazooClient(hosts=connect_string, connection_retry = kz_retry, command_retry = kz_retry, timeout = 1)
-        try:
-                zk.start()
-                for i in range(10):
-                    if i % 3 == (server_index-1):
-                        returned = zk.create("/zookeeper/" + str(i), 'a' * 4);
-                zk.stop()
-                out += 'Successfully create at server ' + str(server_index - 1) + '\n'
-        except Exception as e:
-                err += 'Could not create at server ' + str(server_index - 1) + '\t:' + str(e) + '\n'
+        	connect_string = host_list[server_index-1] + ':' + str(port_list[server_index-1])
+        	kz_retry = KazooRetry(max_tries=1, delay=0.25, backoff=2)
+        	zk = KazooClient(hosts=connect_string, connection_retry = kz_retry, command_retry = kz_retry, timeout = 1)
+        	try:
+                	zk.start()
+                	for i in range(10):
+                    		if i % 3 == (server_index-1):
+                        		returned = zk.create("/zookeeper/" + str(i), 'a' * 4);
+                	zk.stop()
+                	out += 'Successfully create at server ' + str(server_index - 1) + '\n'
+        	except Exception as e:
+                	err += 'Could not create at server ' + str(server_index - 1) + '\t:' + str(e) + '\n'
+			all_create = False
 
 
 print out
@@ -171,16 +175,17 @@ def write(server_index):
                 werr.append('Could not put at server ' + str(server_index - 1) + '\t:' + str(e))
 
 workloads = []
-for server_index in range(1, 4):
-	buf = threading.Thread(target=lambda: read(server_index))
-	buf.start()
-	workloads.append(buf)
-	buf = threading.Thread(target=lambda: write(server_index))
-	buf.start()
-	workloads.append(buf)
+if all_create:
+	for server_index in range(1, 4):
+		buf = threading.Thread(target=lambda: read(server_index))
+		buf.start()
+		workloads.append(buf)
+		buf = threading.Thread(target=lambda: write(server_index))
+		buf.start()
+		workloads.append(buf)
 
-for workload in workloads :
-	workload.join()
+	for workload in workloads :
+		workload.join()
 
 for s in rout :
 	print s
