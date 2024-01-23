@@ -5,7 +5,6 @@ import os
 import time
 import subprocess
 import logging
-from hdfs3 import HDFileSystem
 import random
 import threading
 
@@ -22,8 +21,8 @@ port_list = [17867, 17868, 17869]
 #ZooKeeper code home, log file names
 #ZK_HOME = '~/legolas-target-systems/zookeeper/3.4.6/'
 ZK_HOME = '~/legolas-target-systems/3.2.2/'
-logfile_name1 = 'hadoop-tonypan-namenode-razor15.out'
-logfile_name2 = 'hadoop-tonypan-datanode-razor15.out'
+logfile_name1 = 'hadoop-tonypan-namenode-razor15.log'
+logfile_name2 = 'hadoop-tonypan-datanode-razor15.log'
 
 #Kill all Zookeeper Processes
 os.system("pkill -f \'java.*hdfs*\'")
@@ -60,6 +59,11 @@ for i in [0, 1, 2]:
 
 
 
+# Get rid of format stage 
+#for i in range(0,3):
+#	os.system('cp -R ' + os.path.join(CURR_DIR, 'store-'+str(i+1)+'.back') + ' ' + server_dirs[i])
+
+
 
 # Start the ZooKeeper cluster
 #for i in [0, 1, 2]:
@@ -83,8 +87,8 @@ if log_dir is not None:
                 out, err = invoke_cmd('ps aux | grep hdfs')
                 to_write = ''
                 out = out.split('\n')
-                out = [i for i in out if i is not None and len(i) > 0 and ('conf-1.mp' in i or 'conf-2.mp' in i or 'conf-3.mp' in i)]
-                to_check = ['conf-1.mp', 'conf-2.mp', 'conf-3.mp']
+                out = [i for i in out if i is not None and len(i) > 0 and ('logs-1' in i or 'logs-2' in i or 'logs-3' in i)]
+                to_check = ['logs-1', 'logs-2', 'logs-3']
                 for check in to_check:
                         found = False
                         for i in out:
@@ -104,31 +108,42 @@ rerr = []
 rout = []
 
 # Issue Reads on all the nodes in the cluster and check its value
-def read(server_index):  
+def read(server_index, file_index):  
         global rerr 
         global rout 
         returned = None
-        hdfs = HDFileSystem(host='localhost', port=port_list[server_index-1])
+        out, err = invoke_cmd(os.path.join(CURR_DIR, 'client.sh') + ' ' + os.path.join(CURR_DIR, 'conf-'+str(server_index)+'.mp/') + ' read  /'+ str(file_index) + ' 5')
+        rerr.append(err) 
+
+
+
 
 werr = []
 wout= []
 
 # Write workload
-def write(server_index):
+def write(server_index, file_index):
         global werr 
         global wout   
         returned = None
-        hdfs = HDFileSystem(host='localhost', port=port_list[server_index-1])
+        out, err = invoke_cmd(os.path.join(CURR_DIR, 'client.sh') + ' ' + os.path.join(CURR_DIR, 'conf-'+str(server_index)+'.mp/') + ' write /'+ str(file_index) + ' 5')
+        rerr.append(err) 
+
+
+        
+for file_index in range(0, 5):
+	write(1,file_index)
 
 workloads = []
         
 for server_index in range(1, 4):
-        buf = threading.Thread(target=lambda: read(server_index))
-        buf.start()
-        workloads.append(buf)
-        buf = threading.Thread(target=lambda: write(server_index))
-        buf.start()
-        workloads.append(buf)
+	for file_index in range(0, 5):
+        	buf = threading.Thread(target=lambda: read(server_index, file_index))
+        	buf.start()
+        	workloads.append(buf)
+        	#buf = threading.Thread(target=lambda: write(server_index))
+        	#buf.start()
+        	#workloads.append(buf)
 
 for workload in workloads :
         workload.join()
@@ -178,8 +193,8 @@ if log_dir is not None:
                 out, err = invoke_cmd('ps aux | grep hdfs')
                 to_write = ''
                 out = out.split('\n')
-                out = [i for i in out if i is not None and len(i) > 0 and ('conf-1.mp' in i or 'conf-2.mp' in i or 'conf-3.mp' in i)]
-                to_check = ['conf-1.mp', 'conf-2.mp', 'conf-3.mp']
+                out = [i for i in out if i is not None and len(i) > 0 and ('logs-1' in i or 'logs-2' in i or 'logs-3' in i)]
+                to_check = ['logs-1', 'logs-2', 'logs-3']
                 for check in to_check:
                         found = False
                         for i in out:
