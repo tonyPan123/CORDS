@@ -66,6 +66,11 @@ for i in range(0, machine_count):
 	subprocess.check_output("rm -rf " + data_dir_snapshots[i], shell = True)
 	subprocess.check_output("rm -rf " + data_dir_mount_points[i], shell = True)
 	subprocess.check_output("mkdir " + data_dir_mount_points[i], shell = True)
+	# Format !!!
+	subprocess.check_output("rm -rf " + data_dirs[i], shell = True)
+	subprocess.check_output("mkdir " + data_dirs[i], shell = True)
+	os.system('cp -a ' + data_dirs[i]+'.back/.' + ' ' + data_dirs[i])
+
 
 for i in range(0, machine_count):
 	subprocess.check_output("cp -R " + data_dirs[i] + " " + data_dir_snapshots[i], shell = True)
@@ -122,5 +127,10 @@ for trace_file in trace_files:
 		os.remove(trace_file)
 		with open(trace_file, 'w') as f:
 			f.write(to_write_final)
+
+# Rollback mount point
+for i in range(0, machine_count):
+        subprocess.check_output("rm -rf " + data_dirs[i], shell = True)
+	subprocess.check_output("cp -R " + data_dir_snapshots[i] + " " + data_dirs[i], shell = True)
 
 print 'Tracing completed...'
