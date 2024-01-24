@@ -108,27 +108,28 @@ if log_dir is not None:
 cerr = []
 cout = []
 
-def create(server_index, file_index):  
+def create(server_index):  
         global rerr 
         global rout 
         returned = None
-        out, err = invoke_cmd(os.path.join(CURR_DIR, 'client.sh') + ' ' + str(port_list[server_index]) + ' create  '+ str(server_index) + ' 5')
+        out, err = invoke_cmd(os.path.join(CURR_DIR, 'client.sh') + ' ' + str(host_list[server_index-1]) + ':' + str(port_list[server_index-1]) + ' create  '+ str(server_index) + ' 5')
         cerr.append(err) 
+        cout.append(out) 
 
 workloads = []
 
 for server_index in range(1, 4):
-    buf = threading.Thread(target=lambda: read(server_index, file_index))
+    buf = threading.Thread(target=lambda: create(server_index))
     buf.start()
     workloads.append(buf)
 
 for workload in workloads :
         workload.join()
 
-for s in cerr :
-	print (c)
-for s in cerr :
-	print (c)
+for s in cout :
+	print (s)
+#for s in cerr :
+#	print (s)
 
 rerr = []
 rout = []
@@ -139,7 +140,8 @@ def consume(server_index, file_index, topic_index):
         global rout 
         returned = None
         topic = 'gray-' + str(file_index) + '-' + str(topic_index)
-        out, err = invoke_cmd(os.path.join(CURR_DIR, 'client.sh') + ' ' + str(port_list[server_index]) + ' consume '+ topic + ' 0 100')
+        out, err = invoke_cmd(os.path.join(CURR_DIR, 'client.sh') + ' ' + str(host_list[server_index-1]) + ':' + str(port_list[server_index-1]) + ' consume '+ topic + ' 0 10')
+        rout.append(out) 
         rerr.append(err) 
 
 
@@ -153,8 +155,9 @@ def produce(server_index, file_index, topic_index):
         global wout   
         returned = None
         topic = 'gray-' + str(file_index) + '-' + str(topic_index)
-        out, err = invoke_cmd(os.path.join(CURR_DIR, 'client.sh') + ' ' + str(port_list[server_index]) + ' produce '+ topic + ' 100')
-        rerr.append(err) 
+        out, err = invoke_cmd(os.path.join(CURR_DIR, 'client.sh') + ' ' + str(host_list[server_index-1]) + ':' + str(port_list[server_index-1]) + ' produce '+ topic + ' 100')
+        wout.append(out) 
+        werr.append(err) 
 
 
 
@@ -163,10 +166,10 @@ workloads = []
 for server_index in range(1, 4):
     for file_index in range(1, 4):
         for topic_index in range(0, 5):
-            buf = threading.Thread(target=lambda: read(server_index, file_index, topic_index))
-            buf.start()
-            workloads.append(buf)
-            buf = threading.Thread(target=lambda: write(server_index, file_index, topic_index))
+            #buf = threading.Thread(target=lambda: consume(server_index, file_index, topic_index))
+            #buf.start()
+            #workloads.append(buf)
+            buf = threading.Thread(target=lambda: produce(server_index, file_index, topic_index))
             buf.start()
             workloads.append(buf)
 
@@ -177,10 +180,10 @@ for s in rout :
 	print (s)
 for s in wout :
 	print (s)
-for s in rerr :
-	print (s)
-for s in werr :
-	print (s)
+#for s in rerr :
+#	print (s)
+#for s in werr :
+#	print (s)
 
 
 
