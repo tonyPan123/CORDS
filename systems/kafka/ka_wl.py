@@ -55,7 +55,7 @@ for i in [0, 1, 2]:
         config_files.append((os.path.join(os.path.join(CURR_DIR, 'conf-'+str(i+1)+'.mp'), 'server.properties')))
         if ".mp" in server_dirs[i]: 
                 os.system('cp ' + os.path.join(os.path.join(CURR_DIR, 'conf-'+str(i+1)+'.back'), 'server.properties')  + ' ' + config_files[i])
-                print 'Mount' + config_files[i]
+                print ('Mount' + config_files[i])
         else: 
                 os.system('cp ' + os.path.join(os.path.join(CURR_DIR, 'conf-'+str(i+1)), 'server.properties')  + ' ' + config_files[i])
 
@@ -126,9 +126,9 @@ for workload in workloads :
         workload.join()
 
 for s in cerr :
-	print c
+	print (c)
 for s in cerr :
-	print c
+	print (c)
 
 rerr = []
 rout = []
@@ -174,13 +174,13 @@ for workload in workloads :
         workload.join()
 
 for s in rout :
-	print s
+	print (s)
 for s in wout :
-	print s
+	print (s)
 for s in rerr :
-	print s
+	print (s)
 for s in werr :
-	print s
+	print (s)
 
 
 
