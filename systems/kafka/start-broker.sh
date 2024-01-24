@@ -23,7 +23,7 @@ LOG_DIR=$3 \
 JMX_PORT=$(($JMX_PORT_BASE + $1)) \
 KAFKA_LOG4J_OPTS="-Dlog4j.configuration=file:$workspace/conf-$1/log4j.properties" \
 KAFKA_OPTS="$KAFKA_OPTS -noverify" \
-$KAFKA_SRC/bin/kafka-server-start.sh -daemon $workspace/conf-$1/server.properties &
+$KAFKA_SRC/bin/kafka-server-start.sh -daemon $workspace/conf-$1.mp/server.properties &
 PID=$!
 
 wait $PID
