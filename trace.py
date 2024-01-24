@@ -69,7 +69,7 @@ for i in range(0, machine_count):
 	# Format !!!
 	subprocess.check_output("rm -rf " + data_dirs[i], shell = True)
 	subprocess.check_output("mkdir " + data_dirs[i], shell = True)
-	os.system('cp -a ' + data_dirs[i]+'.back/.' + ' ' + data_dirs[i])
+	#os.system('cp -a ' + data_dirs[i]+'.back/.' + ' ' + data_dirs[i])
 
 
 for i in range(0, machine_count):

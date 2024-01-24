@@ -172,7 +172,7 @@ def cords_check():
 					subprocess.check_output("rm -rf " + data_dirs[mach], shell = True)
 					subprocess.check_output("cp -R " + data_dir_snapshots[mach] + ' ' + data_dirs[mach], shell = True)
 					# Format !!!
-					os.system('cp -a ' + data_dirs[i]+'.back/.' + ' ' + data_dirs[i])
+					#os.system('cp -a ' + data_dirs[i]+'.back/.' + ' ' + data_dirs[i])
 
 				subprocess.check_output("rm -rf " + data_dir_mount_points[corrupt_machine], shell = True)	
 				subprocess.check_output("mkdir " + data_dir_mount_points[corrupt_machine], shell = True)	
