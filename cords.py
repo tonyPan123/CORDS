@@ -40,7 +40,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--trace_files', nargs='+', required = True, help = 'Trace file paths')
 parser.add_argument('--data_dirs', nargs='+', required = True, help = 'Location of data directories')
 parser.add_argument('--workload_command', type = str)
-parser.add_argument('--cords_results_base_dir', type = str, default='cords-hdfs-trials', help = 'Location for checker state and results')
+parser.add_argument('--cords_results_base_dir', type = str, default='cords-kafka-trials', help = 'Location for checker state and results')
 parser.add_argument('--checker_command', type = str, help = 'Checker for workloads that modify application state')
 
 uppath = lambda _path, n: os.sep.join(_path.split(os.sep)[:-n])
@@ -167,7 +167,7 @@ def cords_check():
 				log_dir =  'result_' + (str(corrupt_machine) + '_' + str(corrupt_filename[dir_index :]) + '_' + str(block) + '_' + str(op) + '_' + str(err_type)).replace('/', '_')
 				log_dir_path =  os.path.join(os.path.join(cords_results_base_dir, str(count)), log_dir)
 				
-				print str(op) + ' ' + str(corrupt_machine) + ':' + str(corrupt_filename) + ':' + str(block) + ':' + str(err_type)
+				print (str(op) + ' ' + str(corrupt_machine) + ':' + str(corrupt_filename) + ':' + str(block) + ':' + str(err_type))
 				for mach in machines:
 					subprocess.check_output("rm -rf " + data_dirs[mach], shell = True)
 					subprocess.check_output("cp -R " + data_dir_snapshots[mach] + ' ' + data_dirs[mach], shell = True)
@@ -204,7 +204,7 @@ def cords_check():
 				os.system("rm -rf " + outfile)
 				os.system("touch " + outfile)
 				with open(outfile, 'a') as f:
-					f.write(out + '\n' + err + '\n')
+					f.write(str(out) + '\n' + str(err) + '\n')
 					
 				fuse_unmount = fuse_unmount_command%(data_dir_mount_points[corrupt_machine]) 
 				os.system(fuse_unmount)
@@ -223,16 +223,16 @@ def cords_check():
 
 				if replay_check_needed:
 					checker_command_curr = checker_command + ' ' + log_dir_path
-					print 'Invoking checker...'
+					print ('Invoking checker...')
 					os.system(checker_command_curr)
 
 				count += 1
-				print 'States completed:' + str(count) + '/' + str(total)
+				print ('States completed:' + str(count) + '/' + str(total))
 				#if count == 1:
 				#	return
 
 start_test = time.time()
 cords_check()
-print 'cords-check done!'
+print ('cords-check done!')
 end_test = time.time()
-print 'Testing took ' + str((end_test - start_test)) + ' seconds...'
+print ('Testing took ' + str((end_test - start_test)) + ' seconds...')

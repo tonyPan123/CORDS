@@ -80,7 +80,7 @@ for i in range(0, machine_count):
 
 
 for i in range(0, machine_count):
-	print fuse_command_trace%(data_dirs[i], data_dir_mount_points[i], trace_files[i])
+	#print fuse_command_trace%(data_dirs[i], data_dir_mount_points[i], trace_files[i])
 	os.system(fuse_command_trace%(data_dirs[i], data_dir_mount_points[i], trace_files[i]))
 
 os.system('sleep 1')
@@ -130,7 +130,7 @@ for trace_file in trace_files:
 
 # Rollback mount point
 for i in range(0, machine_count):
-        subprocess.check_output("rm -rf " + data_dirs[i], shell = True)
+	subprocess.check_output("rm -rf " + data_dirs[i], shell = True)
 	subprocess.check_output("cp -R " + data_dir_snapshots[i] + " " + data_dirs[i], shell = True)
 
-print 'Tracing completed...'
+print ('Tracing completed...')
